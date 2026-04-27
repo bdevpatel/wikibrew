@@ -1,0 +1,37 @@
+{
+  "name": "wikibrew",
+  "version": "1.0.0",
+  "description": "Scaffold an LLM-maintained knowledge base following Karpathy's LLM Wiki pattern",
+  "bin": {
+    "wikibrew": "index.js"
+  },
+  "files": [
+    "index.js",
+    "template/"
+  ],
+  "keywords": [
+    "llm",
+    "wiki",
+    "knowledge-base",
+    "obsidian",
+    "scaffold",
+    "cli",
+    "karpathy",
+    "second-brain",
+    "rag",
+    "markdown"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bdevpatel/wikibrew.git"
+  },
+  "homepage": "https://github.com/bdevpatel/wikibrew#readme",
+  "bugs": {
+    "url": "https://github.com/bdevpatel/wikibrew/issues"
+  },
+  "author": "bdevpatel",
+  "license": "MIT"
+}
