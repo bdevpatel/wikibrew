@@ -9,7 +9,7 @@
   <img alt="node" src="https://img.shields.io/badge/node-%3E%3D18-0EA5E9">
 </p>
 
-`wikibrew` scaffolds a complete wiki workspace where your AI agent continuously ingests sources, links concepts and entities, maintains structure, and helps you query insights over time.
+`wikibrew` scaffolds a complete wiki workspace where your AI agent can continuously ingest sources, link concepts and entities, maintain structure, and help you query insights over time—while still letting you create your own pages, notes, and custom sections whenever you want.
 
 Inspired by Andrej Karpathy's [LLM Wiki pattern](https://gist.github.com/karpathy/1dd0294ef9567971c1e4348a90d69285).
 
@@ -59,7 +59,7 @@ my-wiki/
 ├── raw/                    # Source documents you collect
 │   ├── sources/            # Articles, papers, notes, transcripts
 │   └── assets/             # Images, diagrams, media
-├── wiki/                   # LLM-maintained knowledge layer
+├── wiki/                   # Human + LLM maintained knowledge layer
 │   ├── index.md            # Master map of pages
 │   ├── log.md              # Chronological operations log
 │   ├── overview.md         # Scope and purpose
