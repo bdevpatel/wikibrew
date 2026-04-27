@@ -70,6 +70,7 @@ Clip articles directly into `raw/sources/` with one click.
 
 Summarize links, files, and media from the command line. Your LLM can call this to pre-process sources.
 
+- **Docs:** [npm package page](https://www.npmjs.com/package/@steipete/summarize)
 - **Install:** `npm i -g @steipete/summarize`
 - **Verify:** `summarize --help`
 - **Use when:** Processing video/audio content, previewing long documents before full ingest, fetching web content that the LLM can't access directly.
@@ -78,6 +79,7 @@ Summarize links, files, and media from the command line. Your LLM can call this 
 
 Local markdown search engine with hybrid BM25/vector search and LLM re-ranking. Also available as an MCP server.
 
+- **Docs:** [npm package page](https://www.npmjs.com/package/@tobilu/qmd)
 - **Install:** `npm i -g @tobilu/qmd`
 - **Verify:** `qmd --help`
 - **Use when:** Your wiki grows beyond ~100 pages and `index.md` scanning becomes slow. The LLM will use this automatically when instructed.
@@ -86,6 +88,7 @@ Local markdown search engine with hybrid BM25/vector search and LLM re-ranking. 
 
 Browser automation for web research. Lets your LLM browse the web when built-in tools aren't enough.
 
+- **Docs:** [npm package page](https://www.npmjs.com/package/agent-browser)
 - **Install:** `npm i -g agent-browser && agent-browser install`
 - **Verify:** `agent-browser --help`
 - **Use when:** The LLM needs to research topics beyond your existing sources — filling data gaps, fact-checking claims, finding related work.

@@ -87,6 +87,7 @@ wikibrew [project-name] [options]
 | `--git` | Initialize a git repository |
 | `--no-git` | Skip git initialization |
 | `--no-tools` | Skip CLI tool installation prompts |
+| `--uninstall-tools` | Open interactive prompt to uninstall wikibrew CLI tools |
 | `-h`, `--help` | Show help |
 | `-v`, `--version` | Show version |
 
@@ -104,6 +105,9 @@ npx wikibrew . --agents all --git
 
 # Scripted setup (CI / dotfiles)
 npx wikibrew my-wiki --agents claude --domain "reading notes" --git --no-tools
+
+# Uninstall previously installed helper tools
+npx wikibrew --uninstall-tools
 ```
 
 ## Supported AI Agents
@@ -122,9 +126,9 @@ Each generated instruction file is self-contained and includes schema, ingest/qu
 
 - **Obsidian** — best markdown graph/navigation experience ([obsidian.md](https://obsidian.md))
 - **Obsidian Web Clipper** — quick source capture into `raw/sources/`
-- **summarize CLI** — fast preprocessing for links/files/media
-- **qmd CLI** — scalable markdown retrieval (hybrid search + rerank)
-- **agent-browser CLI** — browser automation for web research
+- **summarize CLI** — fast preprocessing for links/files/media ([docs](https://www.npmjs.com/package/@steipete/summarize))
+- **qmd CLI** — scalable markdown retrieval (hybrid search + rerank) ([docs](https://www.npmjs.com/package/@tobilu/qmd))
+- **agent-browser CLI** — browser automation for web research ([docs](https://www.npmjs.com/package/agent-browser))
 - **Marp / Dataview (Obsidian plugins)** — presentations and metadata dashboards
 
 ## Workflow Examples

@@ -25,6 +25,7 @@ const CLI_TOOLS = [
     key: "summarize",
     label: "summarize",
     desc: "Summarize links, files, and media from the CLI",
+    pkg: "@steipete/summarize",
     install: "npm i -g @steipete/summarize",
     verify: "summarize",
   },
@@ -32,6 +33,7 @@ const CLI_TOOLS = [
     key: "qmd",
     label: "qmd",
     desc: "Local markdown search engine (BM25 + vector + re-rank)",
+    pkg: "@tobilu/qmd",
     install: "npm i -g @tobilu/qmd",
     verify: "qmd",
   },
@@ -39,6 +41,7 @@ const CLI_TOOLS = [
     key: "agent-browser",
     label: "agent-browser",
     desc: "Browser automation for web research",
+    pkg: "agent-browser",
     install: "npm i -g agent-browser",
     postInstall: "agent-browser install",
     verify: "agent-browser",
@@ -158,30 +161,61 @@ function createPrompter() {
   }
 
   async function selectMultiple(header, items, defaults = []) {
-    console.log("");
-    console.log(header);
-    console.log("");
-    for (let i = 0; i < items.length; i++) {
-      const def = defaults.includes(items[i].key) ? " (auto-detected)" : "";
-      console.log(`  ${i + 1}. ${items[i].label}  → ${items[i].file || items[i].desc}${def}`);
-    }
-    console.log("");
-    const defaultStr = defaults.length
-      ? defaults.map((d) => items.findIndex((it) => it.key === d) + 1).filter((n) => n > 0).join(",")
-      : "";
-    const hint = defaultStr ? ` [default: ${defaultStr}]` : "";
-    const answer = await ask(`Enter numbers separated by commas, 'all', or 'none'${hint}: `);
+    const selected = new Set(
+      defaults
+        .filter((key) => items.some((item) => item.key === key))
+    );
 
-    if (!answer && defaultStr) {
-      return defaults;
-    }
-    if (!answer || answer.toLowerCase() === "none") return [];
-    if (answer.toLowerCase() === "all") return items.map((it) => it.key);
+    while (true) {
+      console.log("");
+      console.log(header);
+      console.log("");
 
-    const nums = answer.split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
-    return nums
-      .filter((n) => n >= 1 && n <= items.length)
-      .map((n) => items[n - 1].key);
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const marker = selected.has(item.key) ? "x" : " ";
+        const def = defaults.includes(item.key) ? " (auto-detected)" : "";
+        console.log(`  ${i + 1}. [${marker}] ${item.label}  → ${item.file || item.desc}${def}`);
+      }
+
+      console.log("");
+      console.log("  Type a number to toggle, multiple numbers (spaces/commas), 'a' for all, 'n' for none.");
+      const answer = (await ask("  Press Enter when done [done]: ")).toLowerCase();
+
+      if (!answer || answer === "d" || answer === "done") {
+        return items.filter((item) => selected.has(item.key)).map((item) => item.key);
+      }
+
+      if (answer === "a" || answer === "all") {
+        for (const item of items) selected.add(item.key);
+        continue;
+      }
+
+      if (answer === "n" || answer === "none") {
+        selected.clear();
+        continue;
+      }
+
+      const tokens = answer.split(/[\s,]+/).filter(Boolean);
+      let changed = false;
+
+      for (const token of tokens) {
+        const num = parseInt(token, 10);
+        if (isNaN(num) || num < 1 || num > items.length) continue;
+
+        const key = items[num - 1].key;
+        if (selected.has(key)) {
+          selected.delete(key);
+        } else {
+          selected.add(key);
+        }
+        changed = true;
+      }
+
+      if (!changed) {
+        console.log("  Invalid input. Use numbers, 'a', 'n', or Enter to finish.");
+      }
+    }
   }
 
   function close() {
@@ -285,7 +319,7 @@ function initGit(targetDir) {
 function installTool(tool) {
   try {
     console.log(`  Installing ${tool.label}...`);
-    execFileSync("npm", ["i", "-g", ...tool.install.split(" ").slice(3)], {
+    execFileSync("npm", ["i", "-g", tool.pkg], {
       stdio: ["ignore", "pipe", "pipe"],
       shell: true,
     });
@@ -295,6 +329,19 @@ function installTool(tool) {
         shell: true,
       });
     }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function uninstallTool(tool) {
+  try {
+    console.log(`  Uninstalling ${tool.label}...`);
+    execFileSync("npm", ["rm", "-g", tool.pkg], {
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: true,
+    });
     return true;
   } catch {
     return false;
@@ -318,6 +365,7 @@ function printHelp() {
   console.log("    --git                Initialize a git repository (default in interactive mode)");
   console.log("    --no-git             Skip git initialization");
   console.log("    --no-tools           Skip CLI tool installation prompts");
+  console.log("    --uninstall-tools    Interactive uninstaller for wikibrew CLI tools");
   console.log("    -h, --help           Show this help");
   console.log("    -v, --version        Show version");
   console.log("");
@@ -325,6 +373,7 @@ function printHelp() {
   console.log("    npx wikibrew my-wiki");
   console.log("    npx wikibrew my-wiki --agents copilot,claude --domain \"AI research\"");
   console.log("    npx wikibrew . --agents all --git");
+  console.log("    npx wikibrew --uninstall-tools");
   console.log("");
 }
 
@@ -344,6 +393,7 @@ function parseArgs(argv) {
 
     if (arg === "-h" || arg === "--help") return { action: "help" };
     if (arg === "-v" || arg === "--version") return { action: "version" };
+    if (arg === "--uninstall-tools") return { action: "uninstall-tools" };
     if (arg === "--git") { parsed.git = true; continue; }
     if (arg === "--no-git") { parsed.git = false; continue; }
     if (arg === "--no-tools") { parsed.noTools = true; continue; }
@@ -399,13 +449,57 @@ async function main() {
   if (parsed.action === "help") { printHelp(); return; }
   if (parsed.action === "version") { console.log(version); return; }
 
-  const isInteractive = process.stdin.isTTY && parsed.agents === null;
+  const isUninstallMode = parsed.action === "uninstall-tools";
+  const isInteractive = process.stdin.isTTY && (isUninstallMode || parsed.agents === null);
   let prompt;
   if (isInteractive) {
     prompt = createPrompter();
   }
 
   try {
+    if (isUninstallMode) {
+      if (!commandExists("npm")) {
+        console.error("Error: npm not found in PATH.");
+        process.exit(1);
+      }
+
+      const selectedToolKeys = isInteractive
+        ? await prompt.selectMultiple(
+            "Select CLI tools to uninstall",
+            CLI_TOOLS.map((t) => ({ key: t.key, label: t.label, desc: t.desc })),
+            []
+          )
+        : CLI_TOOLS.map((t) => t.key);
+
+      if (!selectedToolKeys.length) {
+        console.log("\nNo tools selected. Nothing to uninstall.\n");
+        return;
+      }
+
+      if (isInteractive) {
+        const ok = await prompt.confirm("Uninstall selected tools?", false);
+        if (!ok) {
+          console.log("\nCancelled. No tools were uninstalled.\n");
+          return;
+        }
+      }
+
+      console.log("");
+      console.log("Removing selected CLI tools...");
+      for (const toolKey of selectedToolKeys) {
+        const tool = CLI_TOOLS.find((t) => t.key === toolKey);
+        if (!tool) continue;
+        const ok = uninstallTool(tool);
+        if (ok) {
+          console.log(`✔ Uninstalled ${tool.label}`);
+        } else {
+          console.log(`⚠ Failed to uninstall ${tool.label} — run manually: npm rm -g ${tool.pkg}`);
+        }
+      }
+      console.log("");
+      return;
+    }
+
     // ---- Project name ----
     let projectName = parsed.projectName;
     if (!projectName && isInteractive) {
