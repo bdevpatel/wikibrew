@@ -4,7 +4,6 @@ Master catalog of all wiki pages. Organized by category.
 
 ## Sources
 
-<!-- Source summary pages go here — one line per page -->
 
 ## Entities
 
